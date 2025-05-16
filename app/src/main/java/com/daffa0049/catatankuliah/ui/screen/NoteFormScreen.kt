@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -30,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -37,6 +41,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.daffa0049.catatankuliah.data.ImageUriDataStore
 import com.daffa0049.catatankuliah.data.model.Note
 import java.io.File
+import androidx.compose.material3.AlertDialog
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,13 +49,15 @@ import java.io.File
 fun NoteFormScreen(
     existingNote: Note? = null,
     onSave: (Note) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    onDeleteNote: (() -> Unit)? = null
 ) {
     val isEditMode = existingNote != null
     val context = LocalContext.current
     val imageUriDataStore = remember { ImageUriDataStore(context) }
     var judul by remember { mutableStateOf(existingNote?.judul ?: "") }
     var isi by remember { mutableStateOf(existingNote?.isi ?: "") }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     var imageUri by remember {
         mutableStateOf(
             existingNote?.gambar?.let { Uri.parse(it) }
@@ -126,6 +133,19 @@ fun NoteFormScreen(
                     IconButton(onClick = onCancel) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
+                },
+                actions = {
+                    if (existingNote != null && onDeleteNote != null) {
+                        IconButton(
+                            onClick = { showDeleteDialog = true },
+                        ) {
+                            Icon(
+                                painter = rememberVectorPainter(Icons.Default.Delete),
+                                contentDescription = "Hapus Catatan",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                 }
             )
         },
@@ -168,7 +188,6 @@ fun NoteFormScreen(
                 }){
                     Text(text = if (isEditMode) "Edit Gambar" else "Pilih Gambar")
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val imageModel = remember(imageUri) {
@@ -215,7 +234,28 @@ fun NoteFormScreen(
             }
         }
     )
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Konfirmasi Hapus") },
+            text = { Text("Apakah kamu yakin ingin menghapus catatan ini?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDeleteNote?.invoke()
+                    showDeleteDialog = false
+                }) {
+                    Text("Hapus")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
 }
+
 
 fun getCurrentTimestamp(): String {
     val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault())

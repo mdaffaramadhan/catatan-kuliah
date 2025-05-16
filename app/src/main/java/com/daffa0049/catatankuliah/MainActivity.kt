@@ -40,10 +40,7 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(
                     route = "form/{noteId}",
-                    arguments = listOf(navArgument("noteId") {
-                        type = NavType.StringType
-                        defaultValue = ""
-                    })
+                    arguments = listOf(navArgument("noteId") { type = NavType.StringType; defaultValue = "" })
                 ) { backStackEntry ->
                     val noteId = backStackEntry.arguments?.getString("noteId") ?: ""
                     val notes by homeViewModel.notes.collectAsState()
@@ -59,7 +56,9 @@ class MainActivity : ComponentActivity() {
                             }
                             navController.popBackStack()
                         },
-                        onCancel = {
+                        onCancel = { navController.popBackStack() },
+                        onDeleteNote = {
+                            note?.id?.let { homeViewModel.deleteNote(it) }
                             navController.popBackStack()
                         }
                     )

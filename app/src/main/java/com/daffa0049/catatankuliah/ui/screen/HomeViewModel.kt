@@ -70,6 +70,22 @@ class HomeViewModel : ViewModel() {
             }
         }
     }
+
+    fun deleteNote(id: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                repository.deleteNote(id)
+                fetchNotes()
+                _errorMessage.value = null
+            } catch (e: Exception) {
+                _errorMessage.value = "Gagal menghapus catatan: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
 }
 
 
