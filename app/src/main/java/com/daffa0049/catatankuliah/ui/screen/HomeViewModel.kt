@@ -7,6 +7,7 @@ import com.daffa0049.catatankuliah.data.network.RetrofitInstance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.net.UnknownHostException
 
 class HomeViewModel : ViewModel() {
     private val repository = NoteRepository(RetrofitInstance.api)
@@ -24,13 +25,19 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _notes.value = repository.getNotes()
+                val result = repository.getNotes()
+               _notes.value = result
                 _errorMessage.value = null
             } catch (e: Exception) {
-                _errorMessage.value = e.localizedMessage ?: "Error occurred"
+                if (e is UnknownHostException) {
+                    _errorMessage.value = "Tidak ada koneksi internet"
+                } else {
+                    _errorMessage.value = "Terjadi kesalahan: ${e.localizedMessage}"
+                }
             } finally {
                 _isLoading.value = false
             }
         }
     }
 }
+

@@ -1,5 +1,8 @@
 package com.daffa0049.catatankuliah.ui.screen
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -25,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.daffa0049.catatankuliah.data.model.Note
@@ -32,6 +37,8 @@ import com.daffa0049.catatankuliah.data.model.Note
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: HomeViewModel) {
+    val context = LocalContext.current
+    val isConnected = isNetworkAvailable(context)
     val notes by viewModel.notes.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
@@ -48,10 +55,17 @@ fun HomeScreen(viewModel: HomeViewModel) {
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier
-            .padding(paddingValues)
-            .fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
             when {
+                !isConnected -> Text(
+                    text = "Tidak ada koneksi internet",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.Center)
+                )
                 isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 errorMessage != null -> Text(
                     text = errorMessage ?: "",
@@ -63,7 +77,6 @@ fun HomeScreen(viewModel: HomeViewModel) {
         }
     }
 }
-
 @Composable
 fun NoteList(notes: List<Note>) {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(8.dp)) {
@@ -93,4 +106,11 @@ fun NoteItem(note: Note) {
             )
         }
     }
+}
+
+fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
