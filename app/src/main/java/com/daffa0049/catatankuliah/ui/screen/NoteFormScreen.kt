@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,7 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
+import com.daffa0049.catatankuliah.data.ImageUriDataStore
 import com.daffa0049.catatankuliah.data.model.Note
 import java.io.File
 
@@ -45,15 +48,34 @@ fun NoteFormScreen(
     onCancel: () -> Unit
 ) {
     val context = LocalContext.current
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val imageUriDataStore = remember { ImageUriDataStore(context) }
     var judul by remember { mutableStateOf(existingNote?.judul ?: "") }
     var isi by remember { mutableStateOf(existingNote?.isi ?: "") }
+    var imageUri by remember { mutableStateOf<Uri?>(existingNote?.gambar?.let { Uri.parse(it) }) }
+    var pickedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    LaunchedEffect(pickedImageUri) {
+        pickedImageUri?.let { uri ->
+            imageUri = uri
+            imageUriDataStore.saveImageUri(uri.toString())
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val lastSavedUri = imageUriDataStore.getImageUri()
+        if (lastSavedUri != null && imageUri == null) {
+            imageUri = Uri.parse(lastSavedUri)
+        }
+    }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { imageUri = it }
+        if (uri != null) {
+            pickedImageUri = uri
+        }
     }
+
     val cameraPermission = android.Manifest.permission.CAMERA
 
     val tempCameraUri = remember { mutableStateOf<Uri?>(null) }
