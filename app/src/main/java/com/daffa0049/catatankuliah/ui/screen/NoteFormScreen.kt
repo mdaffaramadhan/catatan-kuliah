@@ -65,6 +65,9 @@ fun NoteFormScreen(
     }
     var pickedImageUri by remember { mutableStateOf<Uri?>(null) }
 
+    val isFormValid = judul.isNotBlank() && isi.isNotBlank() && imageUri != null
+
+
     LaunchedEffect(pickedImageUri) {
         pickedImageUri?.let { uri ->
             imageUri = uri // ← penting
@@ -208,17 +211,22 @@ fun NoteFormScreen(
 
                 Button(
                     onClick = {
-                        val noteToSave = Note(
-                            id = existingNote?.id ?: "",
-                            createdAt = existingNote?.createdAt ?: getCurrentTimestamp(),
-                            judul = judul,
-                            isi = isi,
-                            gambar = imageUri?.toString() ?: existingNote?.gambar ?: "",
-                            user_id = existingNote?.user_id ?: 1
-                        )
-                        onSave(noteToSave)
+                        if (isFormValid) {
+                            val noteToSave = Note(
+                                id = existingNote?.id ?: "",
+                                createdAt = existingNote?.createdAt ?: getCurrentTimestamp(),
+                                judul = judul,
+                                isi = isi,
+                                gambar = imageUri?.toString() ?: existingNote?.gambar ?: "",
+                                user_id = existingNote?.user_id ?: 1
+                            )
+                            onSave(noteToSave)
+                        } else {
+                            Toast.makeText(context, "Semua field harus diisi", Toast.LENGTH_SHORT).show()
+                        }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = isFormValid // tombol disable kalau form gak valid
                 ) {
                     Text("Simpan")
                 }
