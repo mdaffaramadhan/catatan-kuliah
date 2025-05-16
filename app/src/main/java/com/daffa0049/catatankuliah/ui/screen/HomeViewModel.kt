@@ -2,6 +2,7 @@ package com.daffa0049.catatankuliah.ui.screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.daffa0049.catatankuliah.data.model.Note
 import com.daffa0049.catatankuliah.data.network.NoteRepository
 import com.daffa0049.catatankuliah.data.network.RetrofitInstance
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,8 +13,8 @@ import java.net.UnknownHostException
 class HomeViewModel : ViewModel() {
     private val repository = NoteRepository(RetrofitInstance.api)
 
-    private val _notes = MutableStateFlow<List<com.daffa0049.catatankuliah.data.model.Note>>(emptyList())
-    val notes: StateFlow<List<com.daffa0049.catatankuliah.data.model.Note>> = _notes
+    private val _notes = MutableStateFlow<List<Note>>(emptyList())
+    val notes: StateFlow<List<Note>> = _notes
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -26,7 +27,7 @@ class HomeViewModel : ViewModel() {
             _isLoading.value = true
             try {
                 val result = repository.getNotes()
-               _notes.value = result
+                _notes.value = result
                 _errorMessage.value = null
             } catch (e: Exception) {
                 if (e is UnknownHostException) {
@@ -39,5 +40,36 @@ class HomeViewModel : ViewModel() {
             }
         }
     }
+
+    fun addNote(note: Note) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                repository.addNote(note)
+                fetchNotes()
+                _errorMessage.value = null
+            } catch (e: Exception) {
+                _errorMessage.value = "Gagal menambah catatan: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun updateNote(note: Note) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                repository.updateNote(note.id, note)
+                fetchNotes()
+                _errorMessage.value = null
+            } catch (e: Exception) {
+                _errorMessage.value = "Gagal update catatan: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 }
+
 
