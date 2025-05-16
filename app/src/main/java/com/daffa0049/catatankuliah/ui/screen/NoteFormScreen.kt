@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
-import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import com.daffa0049.catatankuliah.data.ImageUriDataStore
 import com.daffa0049.catatankuliah.data.model.Note
@@ -47,19 +46,25 @@ fun NoteFormScreen(
     onSave: (Note) -> Unit,
     onCancel: () -> Unit
 ) {
+    val isEditMode = existingNote != null
     val context = LocalContext.current
     val imageUriDataStore = remember { ImageUriDataStore(context) }
     var judul by remember { mutableStateOf(existingNote?.judul ?: "") }
     var isi by remember { mutableStateOf(existingNote?.isi ?: "") }
-    var imageUri by remember { mutableStateOf<Uri?>(existingNote?.gambar?.let { Uri.parse(it) }) }
+    var imageUri by remember {
+        mutableStateOf(
+            existingNote?.gambar?.let { Uri.parse(it) }
+        )
+    }
     var pickedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     LaunchedEffect(pickedImageUri) {
         pickedImageUri?.let { uri ->
-            imageUri = uri
+            imageUri = uri // ← penting
             imageUriDataStore.saveImageUri(uri.toString())
         }
     }
+
 
     LaunchedEffect(Unit) {
         val lastSavedUri = imageUriDataStore.getImageUri()
@@ -87,6 +92,7 @@ fun NoteFormScreen(
             imageUri = tempCameraUri.value
         }
     }
+
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -159,8 +165,8 @@ fun NoteFormScreen(
                         }
                     }
                     builder.show()
-                }) {
-                    Text("Pilih Gambar")
+                }){
+                    Text(text = if (isEditMode) "Edit Gambar" else "Pilih Gambar")
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -171,7 +177,7 @@ fun NoteFormScreen(
 
                 imageUri?.let {
                     Image(
-                        painter = rememberAsyncImagePainter(model = it),
+                        painter = rememberAsyncImagePainter(model = imageModel),
                         contentDescription = null,
                         modifier = Modifier
                             .padding(top = 8.dp)
