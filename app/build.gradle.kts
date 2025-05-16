@@ -41,6 +41,9 @@ android {
 
 dependencies {
 
+    implementation (libs.androidx.activity.compose.v171)
+    implementation (libs.material3)
+    implementation (libs.ui)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
