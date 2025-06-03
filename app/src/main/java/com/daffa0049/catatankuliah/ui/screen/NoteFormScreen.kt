@@ -1,7 +1,6 @@
 package com.daffa0049.catatankuliah.ui.screen
 
 import android.app.AlertDialog
-import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -174,7 +173,7 @@ fun NoteFormScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(onClick = {
-                    // Show dialog pilihan
+
                     val options = listOf("Kamera", "Galeri")
                     val builder = AlertDialog.Builder(context)
                     builder.setTitle("Pilih sumber gambar")
@@ -226,7 +225,7 @@ fun NoteFormScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = isFormValid // tombol disable kalau form gak valid
+                    enabled = isFormValid
                 ) {
                     Text("Simpan")
                 }
@@ -269,16 +268,6 @@ fun getCurrentTimestamp(): String {
     val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault())
     sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
     return sdf.format(java.util.Date())
-}
-
-fun createImageUri(context: Context): Uri? {
-    val imagesDir = context.cacheDir
-    val image = File(imagesDir, "camera_photo_${System.currentTimeMillis()}.jpg")
-    return FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.provider",
-        image
-    )
 }
 
 

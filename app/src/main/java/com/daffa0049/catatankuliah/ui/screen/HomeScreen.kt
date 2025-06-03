@@ -57,6 +57,8 @@ import com.daffa0049.catatankuliah.R
 import com.daffa0049.catatankuliah.data.model.Note
 import com.daffa0049.catatankuliah.data.model.User
 import com.daffa0049.catatankuliah.data.network.UserDataStore
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -83,7 +85,7 @@ fun HomeScreen(
         .respectCacheHeaders(false)
         .build()
     var showDialog by remember { mutableStateOf(false) }
-
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
 
     Scaffold(
         topBar = {
@@ -132,7 +134,14 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.align(Alignment.Center)
                 )
-                else -> NoteList(notes = notes, onItemClick = onEditNote)
+                else -> {
+                    SwipeRefresh(
+                        state = swipeRefreshState,
+                        onRefresh = { viewModel.fetchNotes() }
+                    ) {
+                        NoteList(notes, onEditNote)
+                    }
+                }
             }
         }
         if (showDialog){
