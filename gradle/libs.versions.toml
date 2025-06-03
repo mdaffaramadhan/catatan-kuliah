@@ -18,6 +18,8 @@ materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.0"
 retrofit = "2.10.0"
 ui = "1.8.1"
+credentials = "1.5.0"
+googleid = "1.1.1"
 
 [libraries]
 androidx-activity-compose-v171 = { module = "androidx.activity:activity-compose", version.ref = "androidxActivityCompose" }
@@ -44,6 +46,9 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials"}
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
